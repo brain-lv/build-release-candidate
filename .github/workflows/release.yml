@@ -1,0 +1,72 @@
+name: Publish Clean Release Branch
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'src/**'
+      - 'action.yml'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'README.md'
+
+jobs:
+  build-and-publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'npm'
+
+      - name: Clean install
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Publish Clean Release Branch & Tags
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          VERSION="v1.0.${GITHUB_RUN_NUMBER}"
+
+          mkdir -p ../release-artifacts
+          cp -r dist ../release-artifacts/
+          cp action.yml ../release-artifacts/
+          cp README.md ../release-artifacts/
+          rm -rf dist node_modules
+          
+
+          if git ls-remote --exit-code --heads origin releases/v1 > /dev/null 2>&1; then
+            echo "♻️ Remote 'releases/v1' branch found. Checking out..."
+            git fetch origin releases/v1
+            git checkout releases/v1
+            git rm -rf . 
+          else
+            echo "🌱 Remote 'releases/v1' branch not found. Creating orphan..."
+            git checkout --orphan releases/v1
+            git rm -rf .
+          fi
+
+          cp -r ../release-artifacts/* .
+
+          # 6. Commit and Push the Branch
+          git add dist action.yml README.md
+          git commit -m "🚀 Release $VERSION"
+          git push origin releases/v1
+
+          git tag $VERSION
+          git push origin $VERSION
+
+          git tag -f v1
+          git push origin v1 --force

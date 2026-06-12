@@ -1,0 +1,38 @@
+name: 'Build release candidate'
+description: 'Auto-cherry-picks commits via patterns, skips conflicts, and validates via CI to build clean release'
+branding:
+  icon: 'git-pull-request'
+  color: 'blue'
+inputs:
+  prefix-keys:
+    description: 'Comma-separated list of prefixes (e.g., "FEAT-, BUG-")'
+    required: false
+  suffix-keys:
+    description: 'Comma-separated list of suffixes (e.g., "[WIP]")'
+    required: false
+  regex-keys:
+    description: 'Comma-separated list of valid Regex patterns (e.g., "[A-Z]+-\d+")'
+    required: false
+  source-branch:
+    description: 'The development branch with the new commits'
+    required: true
+  target-branch:
+    description: 'The release branch to rebase onto'
+    required: true
+  github-token:
+    description: 'GitHub token for triggering workflows and pushing to gh-pages'
+    required: true
+  test-workflow-id:
+      description: 'Optional: Filename of the workflow to trigger (e.g., test.yml) or local script path. If omitted, validation is skipped.'
+      required: false
+  key-url:
+    description: 'URL template to make targeted keys clickable (e.g. https://jira.com/browse/{key})'
+    required: false
+    default: ''
+  candidate-branch-name:
+    description: 'Template for branch name. Placeholders: {uuid}, {date}, {time}, {buildnumber}'
+    required: false
+    default: 'candidate/{uuid}'
+runs:
+  using: 'node24'
+  main: 'dist/index.js'
