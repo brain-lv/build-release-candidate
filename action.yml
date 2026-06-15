@@ -1,5 +1,5 @@
 name: 'Build release candidate'
-description: 'Selectively cherry-picks commits using prefixes, suffixes, or regex, validates them via CI, and builds a safe release candidate.'
+description: 'Auto-cherry-picks commits via patterns, skips conflicts, and validates via CI to build clean release'
 branding:
   icon: 'git-pull-request'
   color: 'blue'
